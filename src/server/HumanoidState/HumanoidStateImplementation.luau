@@ -52,12 +52,6 @@ function HumanoidStateImplementation:ConnectStateChanged(player, character, call
 			DamageImplementation:HandleFallState(player, character, oldState, newState)
 
 			callback(oldState, newState)
-
-			character.AncestryChanged:Connect(function(_, parent)
-				if not parent then
-					humanoid.StateChanged:Disconnect()
-				end
-			end)
 		end)
 	end
 end
