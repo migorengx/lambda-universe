@@ -23,8 +23,8 @@ Const.ProfileTemplate = {
 Const.DamageTemplate = {
 	MINIMUM_FALL_DISTANCE = 20, -- minimum Y distance for fall damage
 	MINIMUM_FALL_TIME = 1, -- minimum time in seconds for fall damage
-	DAMAGE_MULTIPLIER = 0.75, -- damage multiplier per unit of fall distance
-	MAX_FALL_DAMAGE = 60, -- maximum possible fall damage
+	DAMAGE_MULTIPLIER = 1.5, -- damage multiplier per unit of fall distance
+	MAX_FALL_DAMAGE = 100, -- maximum possible fall damage
 	MAX_HEALTH = 100, -- maximum health
 }
 

@@ -145,44 +145,44 @@ function DamageImplementation:SetupCharacter(player: Player, humanoid: Humanoid,
 			-- animation.AnimationId = "rbxassetid://YOUR_DEATH_ANIMATION_ID" -- Replace with your death animation ID
 
 			-- Retry mechanism with exponential backoff
-			local function loadAnimationWithRetry(maxAttempts)
-				local attempts = 0
-				local baseDelay = 1 -- Base delay in seconds
+			-- local function loadAnimationWithRetry(maxAttempts)
+			-- 	local attempts = 0
+			-- 	local baseDelay = 1 -- Base delay in seconds
 
-				local function attempt()
-					attempts = attempts + 1
-					local success, result = pcall(function()
-						return animator:LoadAnimation(animation)
-					end)
+			-- 	local function attempt()
+			-- 		attempts = attempts + 1
+			-- 		local success, result = pcall(function()
+			-- 			return animator:LoadAnimation(animation)
+			-- 		end)
 
-					if success then
-						return result
-					elseif attempts < maxAttempts then
-						local delay = baseDelay * (2 ^ (attempts - 1)) -- Exponential backoff
-						print(
-							"Asset load failed, retrying in "
-								.. delay
-								.. " seconds (Attempt "
-								.. attempts
-								.. "/"
-								.. maxAttempts
-								.. ")"
-						)
-						task.wait(delay)
-						return attempt()
-					else
-						warn("Failed to load animation after " .. attempts .. " attempts")
-						return nil
-					end
-				end
+			-- 		if success then
+			-- 			return result
+			-- 		elseif attempts < maxAttempts then
+			-- 			local delay = baseDelay * (2 ^ (attempts - 1)) -- Exponential backoff
+			-- 			print(
+			-- 				"Asset load failed, retrying in "
+			-- 					.. delay
+			-- 					.. " seconds (Attempt "
+			-- 					.. attempts
+			-- 					.. "/"
+			-- 					.. maxAttempts
+			-- 					.. ")"
+			-- 			)
+			-- 			task.wait(delay)
+			-- 			return attempt()
+			-- 		else
+			-- 			warn("Failed to load animation after " .. attempts .. " attempts")
+			-- 			return nil
+			-- 		end
+			-- 	end
 
-				return attempt()
-			end
+			-- 	return attempt()
+			-- end
 
-			local animTrack = loadAnimationWithRetry(3) -- Try up to 3 times
-			if animTrack then
-				animTrack:Play()
-			end
+			-- local animTrack = loadAnimationWithRetry(3) -- Try up to 3 times
+			-- if animTrack then
+			-- 	animTrack:Play()
+			-- end
 		end
 
 		print(player.Name .. " died!")
