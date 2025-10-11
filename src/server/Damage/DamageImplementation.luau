@@ -22,10 +22,10 @@ end
 function DamageImplementation:HandleFallState(
 	player: Player,
 	character: Model,
+	humanoid: Humanoid,
 	oldState: Enum.HumanoidStateType,
 	newState: Enum.HumanoidStateType
 )
-	local humanoid = character:FindFirstChild("Humanoid")
 	if not humanoid then
 		return
 	end
@@ -75,7 +75,7 @@ function DamageImplementation:HandleFallState(
 					game:GetService("Debris"):AddItem(effect, 0.5)
 				end
 
-				self:DamageCharacter(player, damage)
+				self:DamageCharacter(player, humanoid, damage)
 			end
 
 			-- Clear fall data
@@ -84,13 +84,12 @@ function DamageImplementation:HandleFallState(
 	end
 end
 
-function DamageImplementation:DamageCharacter(player: Player, amount: number)
+function DamageImplementation:DamageCharacter(player: Player, humanoid: Humanoid, amount: number)
 	local character = player.Character
 	if not character then
 		return
 	end
 
-	local humanoid = character:FindFirstChild("Humanoid")
 	if not humanoid then
 		return
 	end
@@ -108,9 +107,7 @@ function DamageImplementation:Initialize()
 	end)
 end
 
-function DamageImplementation:SetupCharacter(player: Player, character: Model)
-	local humanoid = character:WaitForChild("Humanoid")
-
+function DamageImplementation:SetupCharacter(player: Player, humanoid: Humanoid, character: Model)
 	-- Set initial health
 	humanoid.MaxHealth = Const.DamageTemplate.MAX_HEALTH
 	humanoid.Health = Const.DamageTemplate.MAX_HEALTH

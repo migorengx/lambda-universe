@@ -44,12 +44,12 @@ end
 function HumanoidStateImplementation:ConnectStateChanged(player, character, callback)
 	local humanoid = character:FindFirstChildOfClass("Humanoid")
 	if humanoid then
-		DamageImplementation:SetupCharacter(player, character)
+		DamageImplementation:SetupCharacter(player, humanoid, character)
 		humanoid.StateChanged:Connect(function(oldState, newState)
 			print("Humanoid state changed from", oldState, "to", newState)
 
 			-- Handle fall damage through DamageImplementation
-			DamageImplementation:HandleFallState(player, character, oldState, newState)
+			DamageImplementation:HandleFallState(player, character, humanoid, oldState, newState)
 
 			callback(oldState, newState)
 		end)
