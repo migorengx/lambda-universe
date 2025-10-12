@@ -2,6 +2,7 @@ local ServerScriptService = game:GetService("ServerScriptService")
 local HumanoidStateImplementation = require(script.HumanoidState.HumanoidStateImplementation)
 local ProfileImplementation = require(ServerScriptService.Server.Profile.ProfileImplementation)
 local CheckpointImplementation = require(ServerScriptService.Server.Checkpoint.CheckpointImplementation)
+
 -- Stop Autoload
 game.Players.CharacterAutoLoads = false
 

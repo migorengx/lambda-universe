@@ -3,6 +3,7 @@
 local ServerScriptService = game:GetService("ServerScriptService")
 local Const = require(ServerScriptService.Server.Const)
 local ProfileImplementation = require(ServerScriptService.Server.Profile.ProfileImplementation)
+local LeaderboardImplementation = require(ServerScriptService.Server.Leaderboard.LeaderboardImplementation)
 local CheckpointImplementation = {}
 local placeId = game.PlaceId
 local stringPlaceId = tostring(placeId)
@@ -50,6 +51,10 @@ function CheckpointImplementation:TeleportToCheckpoint(player, character)
 		return
 	end
 
+	-- leaderboard update
+	LeaderboardImplementation:Connect(player)
+	LeaderboardImplementation:UpdateCheckpoint(player, checkpointData)
+
 	print("Found checkpoint in workspace:", checkpoint:GetFullName())
 	-- teleport player to checkpoint
 	local targetCFrame = checkpoint.CFrame + Vector3.new(0, 5, 0) -- add offset to avoid spawn inside the ground
@@ -79,7 +84,7 @@ function CheckpointImplementation:GetPlayerCheckpoint(player)
 	return checkpoint.currentCheckpoint
 end
 
-function CheckpointImplementation:UpdatePlayerCheckpoint(player, checkpointName)
+function CheckpointImplementation:UpdatePlayerCheckpoint(player, checkpointName, callbackFn)
 	print("Attempting to update checkpoint for", player.Name, "to", checkpointName)
 
 	local profile = ProfileImplementation:GetProfile(player)
@@ -121,6 +126,9 @@ function CheckpointImplementation:UpdatePlayerCheckpoint(player, checkpointName)
 	-- save profile data
 	print("Saving profile data...")
 	profile:Save()
+	if callbackFn then
+		callbackFn(checkpoint)
+	end
 	print("Successfully updated " .. player.Name .. "'s checkpoint to: " .. checkpointName)
 end
 
@@ -178,7 +186,10 @@ function CheckpointImplementation:SyncTouchSpawner()
 					return
 				end
 				-- update player checkpoint data
-				CheckpointImplementation:UpdatePlayerCheckpoint(player, checkpoint.Name)
+				CheckpointImplementation:UpdatePlayerCheckpoint(player, checkpoint.Name, function(updatedCheckpoint)
+					print("Checkpoint updated callback:", updatedCheckpoint)
+					LeaderboardImplementation:UpdateCheckpoint(player, updatedCheckpoint)
+				end)
 			end)
 		end
 	end

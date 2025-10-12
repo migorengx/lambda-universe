@@ -17,3 +17,5 @@ Packages/
 ServerPackages/
 sourcemap.json
 wally.lock
+
+.DS_Store
