@@ -62,8 +62,8 @@ function HealthBarUIv2:Create()
 				BackgroundTransparency = frameTransparency,
 				BackgroundColor3 = Color3.fromRGB(255, 255, 255),
 				Size = UDim2.new(0, 100, 0, 5),
-				Position = UDim2.new(0.5, 0, 0.825, 0),
-				AnchorPoint = Vector2.new(0.5, 0.5),
+				Position = UDim2.new(0.5, 0, 0.85, 0),
+				AnchorPoint = Vector2.new(0.5, 1),
 				[Fusion.Children] = {
 					Fusion.New("Frame")({
 						Name = "HealthBar",

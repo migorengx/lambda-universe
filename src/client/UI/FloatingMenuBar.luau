@@ -29,6 +29,8 @@ local IconButton = Components.Controls.IconButton
 
 local Icons = Modules.Icons
 
+local FloatingDonationWindow = require(script.Parent.FloatingDonationWindow)
+
 game.StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.PlayerList, false)
 
 Scheme.SetAccent(Scheme.Color.Green)
@@ -39,6 +41,7 @@ function FloatingMenuBar:Main()
 	-- Main function to initialize the floating menu bar
 	Fusion.New("ScreenGui")({
 		Parent = PlayerGui,
+		Name = "FloatingMenuBar",
 		[Fusion.Children] = {
 			-- Components.Views.Window({
 			-- 	Size = UDim2.new(0, 150, 0, 30),
@@ -87,6 +90,7 @@ function FloatingMenuBar:Main()
 						LayoutOrder = 2,
 						OnClick = function()
 							print("IconButton Clicked")
+							FloatingDonationWindow:Toggle()
 						end,
 					}),
 
@@ -110,6 +114,7 @@ end
 
 function FloatingMenuBar:Connect()
 	local Players = game:GetService("Players")
+	local FloatingDonationWindow = require(script.Parent.FloatingDonationWindow)
 	local player = Players.LocalPlayer
 
 	-- This function will run every time the player's character spawns
