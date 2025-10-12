@@ -13,31 +13,22 @@ function CheckpointImplementation:TeleportToCheckpoint(player, character)
 	print("Teleporting player to checkpoint...")
 
 	-- Wait for character to load if not already loaded
-	if not player.Character or not player.Character:FindFirstChild("HumanoidRootPart") then
+	if character:FindFirstChild("HumanoidRootPart") then
 		print("Waiting for character and HumanoidRootPart to load...")
 		repeat
 			task.wait()
-		until player.Character and player.Character:FindFirstChild("HumanoidRootPart")
+		until character and character:FindFirstChild("HumanoidRootPart")
 	end
 
 	local profile = ProfileImplementation:GetProfile(player)
-	if profile == nil then
-		warn("Profile not found for player: " .. player.Name)
-		-- Teleport to default position if no profile
-		player.Character.HumanoidRootPart.CFrame = CFrame.new(Const.DefaultPosition)
-		return
-	end
 
-	local checkpoints = profile.Data.checkpoints
-	print("Player checkpoints data:", checkpoints)
-
-	if checkpoints[stringPlaceId] == nil then
+	if profile == nil or profile.Data.checkpoints[stringPlaceId] == nil then
 		warn("No checkpoint data for player: " .. player.Name)
 		player.Character.HumanoidRootPart.CFrame = CFrame.new(Const.DefaultPosition)
 		return
 	end
 
-	local checkpointData = checkpoints[stringPlaceId]
+	local checkpointData = profile.Data.checkpoints[stringPlaceId]
 	print("Checkpoint data for player: ", checkpointData)
 	local checkpointName = checkpointData.currentCheckpoint
 	print("Player's checkpoint name: " .. checkpointName)
@@ -62,6 +53,24 @@ function CheckpointImplementation:TeleportToCheckpoint(player, character)
 	print("Teleported " .. player.Name .. " to checkpoint: " .. checkpoint.Name)
 end
 
+function CheckpointImplementation:GetPlayerCheckpointByProfile(profile)
+	print("Retrieved profile for player: ", profile)
+	if profile == nil then
+		return nil
+	end
+
+	local checkpoint = profile.Data.checkpoints[stringPlaceId]
+
+	-- if checkpoint for this placeId not exist, return nil
+	if checkpoint == nil then
+		return nil
+	end
+
+	print("Retrieved checkpoint data for player: ", checkpoint.currentCheckpoint)
+
+	return checkpoint.currentCheckpoint
+end
+
 function CheckpointImplementation:GetPlayerCheckpoint(player)
 	local profile = ProfileImplementation:GetProfile(player)
 	print("Retrieved profile for player: ", profile)
@@ -70,8 +79,7 @@ function CheckpointImplementation:GetPlayerCheckpoint(player)
 		return nil
 	end
 
-	local checkpoints = profile.Data.checkpoints
-	local checkpoint = checkpoints[stringPlaceId]
+	local checkpoint = profile.Data.checkpoints[stringPlaceId]
 
 	-- if checkpoint for this placeId not exist, return nil
 	if checkpoint == nil then
@@ -84,39 +92,38 @@ function CheckpointImplementation:GetPlayerCheckpoint(player)
 	return checkpoint.currentCheckpoint
 end
 
-function CheckpointImplementation:UpdatePlayerCheckpoint(player, checkpointName, callbackFn)
-	print("Attempting to update checkpoint for", player.Name, "to", checkpointName)
-
-	local profile = ProfileImplementation:GetProfile(player)
+function CheckpointImplementation:UpdatePlayerCheckpoint(profile, checkpointName, callbackFn)
+	-- local profile = ProfileImplementation:GetProfile(player)
 	if profile == nil then
-		warn("Profile not found for player: " .. player.Name)
+		warn("Profile not found ")
 		return
 	end
-	print("Found profile:", profile)
+	-- print("Found profile:", profile)
 
-	local checkpoints = profile.Data.checkpoints
-	print("Current checkpoints data:", checkpoints)
-
-	local checkpoint = checkpoints[stringPlaceId]
-	print("Current checkpoint for this place:", checkpoint)
+	local checkpoint = profile.Data.checkpoints[stringPlaceId]
 
 	-- if checkpoint for this placeId not exist, create new one using from template in Const
 	if checkpoint == nil then
-		print("Creating new checkpoint data for", player.Name)
 		checkpoint = table.clone(Const.CheckpointTemplate)
 		checkpoint.currentCheckpoint = checkpointName
 		checkpoint.numberCheckpoint = self:GenerateNumberCheckpoint(checkpointName)
 		if checkpointName == "summit" then
+			checkpoint.currentCheckpoint = "default"
+			checkpoint.numberCheckpoint = 0
 			checkpoint.numberSummit = checkpoint.numberSummit + 1
 		end
-		checkpoints[stringPlaceId] = checkpoint
-		print("New checkpoint data created:", checkpoint)
+		profile.Data.checkpoints[stringPlaceId] = checkpoint
 	else
 		if checkpoint.currentCheckpoint ~= checkpointName then
 			print("Updating existing checkpoint from", checkpoint.currentCheckpoint, "to", checkpointName)
 			checkpoint.currentCheckpoint = checkpointName
 			checkpoint.numberCheckpoint = self:GenerateNumberCheckpoint(checkpointName)
-			checkpoints[stringPlaceId] = checkpoint
+			if checkpointName == "summit" then
+				checkpoint.currentCheckpoint = "default"
+				checkpoint.numberCheckpoint = 0
+				checkpoint.numberSummit = checkpoint.numberSummit + 1
+			end
+			profile.Data.checkpoints[stringPlaceId] = checkpoint
 		else
 			print("Checkpoint already set to", checkpointName, "- no update needed")
 			return
@@ -129,7 +136,7 @@ function CheckpointImplementation:UpdatePlayerCheckpoint(player, checkpointName,
 	if callbackFn then
 		callbackFn(checkpoint)
 	end
-	print("Successfully updated " .. player.Name .. "'s checkpoint to: " .. checkpointName)
+	print("Successfully updated checkpoint to: " .. checkpointName)
 end
 
 function CheckpointImplementation:GenerateNumberCheckpoint(checkpointName)
@@ -154,39 +161,40 @@ function CheckpointImplementation:SyncTouchSpawner()
 		if checkpoint:IsA("SpawnLocation") then
 			-- connect touch event with debounce event
 			checkpoint.Touched:Connect(function(hit)
-				print("Checkpoint touched:", checkpoint.Name, "by", hit.Name)
+				-- print("Checkpoint touched:", checkpoint.Name, "by", hit.Name)
 				-- check only if human character
 				local hitP = hit.Parent
 				-- check if hit is a character
 				if not hitP:IsA("Model") then
-					print("Hit parent is not a Model:", hitP.Name)
+					-- print("Hit parent is not a Model:", hitP.Name)
 					return
 				end
 				-- check if hit is a character
 				if not hitP:FindFirstChild("Humanoid") then
-					print("No Humanoid found for character:", hitP.Name)
+					-- print("No Humanoid found for character:", hitP.Name)
 					return
 				end
 				-- check if hit is a character
 				if not hitP:FindFirstChild("HumanoidRootPart") then
-					print("No HumanoidRootPart found for character:", hitP.Name)
+					-- print("No HumanoidRootPart found for character:", hitP.Name)
 					return
 				end
 				local player = game.Players:GetPlayerFromCharacter(hitP)
-				print("Player from character:", player)
 				-- check if player type is not human is stop
 				if not player then
-					print("No player found for character:", hitP.Name)
+					-- print("No player found for character:", hitP.Name)
 					return
 				end
-				local cp = CheckpointImplementation:GetPlayerCheckpoint(player)
-				print("current user cp is ", cp)
-				-- check if player is already in checkpoint
+
+				local profile = ProfileImplementation:GetProfile(player)
+
+				local cp = CheckpointImplementation:GetPlayerCheckpointByProfile(profile)
+
 				if cp == checkpoint.Name then
 					return
 				end
 				-- update player checkpoint data
-				CheckpointImplementation:UpdatePlayerCheckpoint(player, checkpoint.Name, function(updatedCheckpoint)
+				CheckpointImplementation:UpdatePlayerCheckpoint(profile, checkpoint.Name, function(updatedCheckpoint)
 					print("Checkpoint updated callback:", updatedCheckpoint)
 					LeaderboardImplementation:UpdateCheckpoint(player, updatedCheckpoint)
 				end)

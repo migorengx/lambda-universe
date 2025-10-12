@@ -5,7 +5,7 @@ local HealthBarUI = {}
 -- Constants
 local BAR_WIDTH = 200
 local BAR_HEIGHT = 20
-local PADDING = 10
+local PADDING = 50
 
 function HealthBarUI:CreateHealthBar()
 	local screenGui = Instance.new("ScreenGui")
@@ -13,10 +13,12 @@ function HealthBarUI:CreateHealthBar()
 	screenGui.ResetOnSpawn = false
 
 	local frame = Instance.new("Frame")
+	frame.Visible = true
 	frame.Name = "HealthBarFrame"
 	frame.Size = UDim2.new(0, BAR_WIDTH, 0, BAR_HEIGHT)
 	frame.Position = UDim2.new(0, PADDING, 1, -(BAR_HEIGHT + PADDING))
-	frame.BackgroundColor3 = Color3.fromRGB(40, 40, 40)
+	frame.AnchorPoint = Vector2.new(0, 1)
+	frame.BackgroundColor3 = Color3.fromRGB(255, 83, 83)
 	frame.BorderSizePixel = 0
 	frame.Parent = screenGui
 

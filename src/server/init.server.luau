@@ -7,17 +7,22 @@ local CheckpointImplementation = require(ServerScriptService.Server.Checkpoint.C
 game.Players.CharacterAutoLoads = false
 
 -- bind events
--- CheckpointImplementation:DisableAllSpawns()
+CheckpointImplementation:DisableAllSpawns()
 CheckpointImplementation:SyncTouchSpawner()
 
 local function onPlayerConnect(player)
 	print(player.Name .. " has connected to the game.")
 
+	task.wait(2)
+
 	-- Handle character spawning
 	local function handleCharacterAdded(character)
 		print("Character added for " .. player.Name)
 		-- Small delay to ensure character is fully loaded
-		task.wait(0.1)
+
+		-- check essentials
+		character:waitForChild("HumanoidRootPart")
+		character:waitForChild("Humanoid")
 
 		-- Teleport to checkpoint
 		CheckpointImplementation:TeleportToCheckpoint(player, character)

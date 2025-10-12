@@ -2,6 +2,7 @@ local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Packages = ReplicatedStorage.Packages
 
 local Players = game:GetService("Players")
+local ServerScriptService = game:GetService("ServerScriptService")
 
 local LocalPlayer = Players.LocalPlayer
 local PlayerGui = LocalPlayer.PlayerGui
@@ -15,8 +16,12 @@ local Modules = Lydie.Modules
 local Scheme = Modules.Scheme
 
 local StarterGui = game:GetService("StarterGui")
+local Const = require(ReplicatedStorage.Shared.Const)
 
 local windowVisible = Fusion.Value(true)
+
+local toggleSprint = Fusion.Value(false)
+local disconnectToggleSprint
 
 local toggleLeaderboard = Fusion.Value(false)
 
@@ -69,9 +74,8 @@ function FloatingMenuBar:Main()
 						LayoutOrder = 1,
 						OnClick = function()
 							local isEnabled = toggleLeaderboard:get()
-							StarterGui:SetCoreGuiEnabled("PlayerList", not isEnabled)
+							StarterGui:SetCoreGuiEnabled(Enum.CoreGuiType.PlayerList, not isEnabled)
 							toggleLeaderboard:set(not isEnabled)
-							isEnabled = not isEnabled
 						end,
 					}),
 
@@ -94,12 +98,51 @@ function FloatingMenuBar:Main()
 						LayoutOrder = 3,
 						OnClick = function()
 							print("IconButton Clicked")
+							toggleSprint:set(not toggleSprint:get())
 						end,
 					}),
 				},
 			}),
 		},
 	})
+	self:Connect()
+end
+
+function FloatingMenuBar:Connect()
+	local Players = game:GetService("Players")
+	local player = Players.LocalPlayer
+
+	-- This function will run every time the player's character spawns
+	local function onCharacterAdded(character)
+		local humanoid = character:WaitForChild("Humanoid")
+		local observeSprint = Fusion.Observer(toggleSprint)
+		disconnectToggleSprint = observeSprint:onChange(function()
+			local sprint = toggleSprint:get()
+			if sprint then
+				-- Currently sprinting, so toggle to walk
+				humanoid.WalkSpeed = Const.WalkSprint.SPRINT_SPEED
+			else
+				-- Currently walking, so toggle to sprint
+				humanoid.WalkSpeed = Const.WalkSprint.WALK_SPEED
+			end
+		end)
+
+		humanoid.Died:Connect(function()
+			-- This code will run every time the local player's character dies
+			disconnectToggleSprint()
+			toggleSprint:set(false)
+			-- You can add your custom death-related logic here,
+			-- such as showing a death screen GUI.
+		end)
+	end
+
+	-- Connect the function to the event
+	player.CharacterAdded:Connect(onCharacterAdded)
+
+	-- Acknowledge the current character if it already exists
+	if player.Character then
+		onCharacterAdded(player.Character)
+	end
 end
 
 function FloatingMenuBar:ToggleVisibility()
